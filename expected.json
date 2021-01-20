@@ -1,0 +1,28 @@
+{
+    "name": "BS-P-Ext_R1",
+    "domain": "self.yourDomain",
+    "release": "2020-06-16T17:05:13Z",
+    "characteristics": {
+        "description": [
+            {
+                "text": "BulkSoil_Plough_extensive_N_fertilization_BS-P-Ext Replicate1"
+            }
+        ],
+        "environment(biome)": [
+            {
+                "text": "agricultural field",
+                "ontologyTerms": [
+                    "http://purl.obolibrary.org/obo/ENVO_00000114"
+                ]
+            }
+        ],
+        "organism": [
+            {
+                "text": "soil metagenome",
+                "ontologyTerms": [
+                    "http://purl.obolibrary.org/obo/NCBITaxon_410658"
+                ]
+            }
+        ]
+    }
+}
