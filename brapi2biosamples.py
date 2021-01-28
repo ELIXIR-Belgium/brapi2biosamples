@@ -3,21 +3,23 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import time
-import re
 
 trial_id = "1"
 endpoint = "https://pippa.psb.ugent.be/BrAPIPPA/brapi/v1"
 date = "2021-01-20T17:05:13Z"
 
+
 def url_path_join(*args):
     """Join path(s) in URL using slashes"""
     return '/'.join(s.strip('/') for s in args)
 
-def characteristic( text, ontology=None):
+
+def characteristic(text, ontology=None):
     if ontology:
         return [{"text": text, "ontologyTerms": [ontology]}]
     else:
         return [{"text": text}]
+
 
 def fetch_object(path: str):
     """
@@ -43,7 +45,7 @@ def fetch_object(path: str):
     return r.json()["result"]
 
 
-def fetch_objects(path: str, params: dict=None, data: dict=None):
+def fetch_objects(path: str, params: dict = None, data: dict = None):
     """
     Fetch BrAPI objects with pagination
     :param path URL path of the BrAPI call (ex '/studies', '/germplasm-search', ...)
@@ -63,16 +65,17 @@ def fetch_objects(path: str, params: dict=None, data: dict=None):
     session.mount('http://', adapter)
     session.mount('https://', adapter)
     output = []
-    while maxcount is 0 or page < maxcount:
+    while maxcount == 0 or page < maxcount:
         params['page'] = page
         params['pageSize'] = pagesize
-        print('retrieving page ' + str(page)+ ' of '+ str(maxcount)+ ' from '+ str(url))
+        print('retrieving page ' + str(page) + ' of ' +
+              str(maxcount) + ' from ' + str(url))
         print("paging params:" + str(params))
         print("GET " + url)
         r = session.get(url, params=params, data=data)
         if r.status_code == 504 and pagesize != 100:
             pagesize = 100
-            print("504 Gateway Timeout Error, testing with pagesize = 100") 
+            print("504 Gateway Timeout Error, testing with pagesize = 100")
             continue
         elif r.status_code != requests.codes.ok:
             print("problem with request: " + str(r))
@@ -91,20 +94,28 @@ trial = fetch_object(f'/trials/{trial_id}')
 added_germplasm = []
 for study in trial['studies']:
     print(f"Getting germplasms from {study['studyDbId']}")
-    allgermplasms =  fetch_objects(f"/studies/{study['studyDbId']}/germplasm")
+    allgermplasms = fetch_objects(f"/studies/{study['studyDbId']}/germplasm")
     for germplasm in allgermplasms:
         if germplasm['germplasmDbId'] not in added_germplasm:
             added_germplasm.append(germplasm['germplasmDbId'])
-            germplasminfo = fetch_object(f"/germplasm/{germplasm['germplasmDbId']}")
-            germjson = {"name": germplasminfo['germplasmDbId'],"domain": endpoint,"release": date, "characteristics": {}}
-            germjson['characteristics']['project name'] = characteristic(study['studyDbId'])
-            germjson['characteristics']['biological material ID'] = characteristic(germplasminfo['germplasmDbId'])
-            germjson['characteristics']['organism'] = characteristic(germplasminfo['commonCropName'])
-            germjson['characteristics']['genus'] = characteristic(germplasminfo['genus'])
-            germjson['characteristics']['species'] = characteristic(germplasminfo['species'])
-            germjson['characteristics']['infraspecific name'] = characteristic(germplasminfo['accessionNumber'])
-            germjson['characteristics']['material source ID'] = characteristic(germplasminfo['germplasmName'])
+            germplasminfo = fetch_object(
+                f"/germplasm/{germplasm['germplasmDbId']}")
+            germjson = {"name": germplasminfo['germplasmDbId'],
+                        "domain": endpoint, "release": date, "characteristics": {}}
+            germjson['characteristics']['project name'] = characteristic(
+                study['studyDbId'])
+            germjson['characteristics']['biological material ID'] = characteristic(
+                germplasminfo['germplasmDbId'])
+            germjson['characteristics']['organism'] = characteristic(
+                germplasminfo['commonCropName'])
+            germjson['characteristics']['genus'] = characteristic(
+                germplasminfo['genus'])
+            germjson['characteristics']['species'] = characteristic(
+                germplasminfo['species'])
+            germjson['characteristics']['infraspecific name'] = characteristic(
+                germplasminfo['accessionNumber'])
+            germjson['characteristics']['material source ID'] = characteristic(
+                germplasminfo['germplasmName'])
 
-            with open('o_' + germplasm['germplasmDbId'] + '.txt', 'w') as outfile:
+            with open('o_' + germplasm['germplasmDbId'] + '.json', 'w') as outfile:
                 outfile.write(json.dumps(germjson, indent=4))
-
