@@ -29,7 +29,7 @@ brapi2biosamples [OPTIONS]
 |----------------------|--------------------------------------------------------------------------------------------------------|----------|
 | -v, --version        | Print version number                                                                                   |          |
 | -t, --trialDbId      | The identifier of a trial                                                                              | yes      |
-| -e, --endpoint       | The URL towards the BrAPI endpint, not ending with /                                                   | yes      |
+| -e, --endpoint       | The URL towards the BrAPI endpoint, not ending with /                                                   | yes      |
 | -d, --date           | The date of sample publication (example:2021-01-20T17:05:13Z)                                          |          |
 | -D, --domain         | The domain of your ENA account                                                                         | yes      |
 | -s, --submit         | When this flag is given, the samples will be submitted to BioSamples instead of being exported as JSON |          |
