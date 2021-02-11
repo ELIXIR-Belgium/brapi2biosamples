@@ -89,7 +89,7 @@ def fetch_objects(endpoint, path, params: dict = None):
 
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.version_option("0.1.0", "-v", "--version", prog_name="brapi2biosamples", help="Print version number")
-@click.option("--trialDbId", "-t", help="The identifier of a trial", required=True)
+@click.option("--trialdbid", "-t", help="The identifier of a trial", required=True)
 @click.option("--endpoint", "-e", help="The URL towards the BrAPI endpint, not ending with /", required=True)
 @click.option("--date", "-d", help="The date of sample publication (example: 2021-01-20T17:05:13Z)", default=datetime.now().isoformat())
 @click.option("--domain", "-D", help="The domain of your ENA account", required=True)
@@ -98,10 +98,10 @@ def fetch_objects(endpoint, path, params: dict = None):
 @click.option("--secret", help="Path to a secret.yml file to deliver the BioSample credentials", type=click.File())
 @click.option("--output", help="Path to a directory where the JSON files are written to.", type=click.Path(exists=True))
 
-def main(trialDbId, endpoint, date, domain, submit, dev, secret, output):
+def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
     """ Submits samples to BioSamples using the Breeding API """
     # Fetch studies from trial
-    trial = fetch_object(endpoint, f'/trials/{trialDbId}')
+    trial = fetch_object(endpoint, f'/trials/{trialdbid}')
     added_germplasm = []
     # Loop over studies
     for study in trial['studies']:

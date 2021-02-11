@@ -30,7 +30,7 @@ brapi2biosamples [OPTIONS]
 | -v, --version        | Print version number                                                                                   |          |
 | -t, --trialDbId      | The identifier of a trial                                                                              | yes      |
 | -e, --endpoint       | The URL towards the BrAPI endpint, not ending with /                                                   | yes      |
-| -d, --date           | The date of sample publication (example:2021-01-20T17:05:13Z)                                          | yes      |
+| -d, --date           | The date of sample publication (example:2021-01-20T17:05:13Z)                                          |          |
 | -D, --domain         | The domain of your ENA account                                                                         | yes      |
 | -s, --submit         | When this flag is given, the samples will be submitted to BioSamples instead of being exported as JSON |          |
 | --dev                | When this flag is given, the samples will be submitted to the dev instance of BioSamples               |          |
@@ -41,8 +41,6 @@ brapi2biosamples [OPTIONS]
 
 ## Examples
 
-
-trial_id = "1"
-endpoint = "https://pippa.psb.ugent.be/BrAPIPPA/brapi/v1"
-date = "2021-01-20T17:05:13Z"
-domain = "self.pippa_submission"
+```
+brapi2biosamples -t 1 -e "https://pippa.psb.ugent.be/BrAPIPPA/brapi/v1" -D "self.pippa_submission"
+```
