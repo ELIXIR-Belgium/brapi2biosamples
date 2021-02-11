@@ -28,14 +28,14 @@ brapi2biosamples [OPTIONS]
 | Option               | Description                                                                                            | Required |
 |----------------------|--------------------------------------------------------------------------------------------------------|----------|
 | -v, --version        | Print version number                                                                                   |          |
-| -t, --trialDbId TEXT | The identifier of a trial                                                                              | yes      |
-| -e, --endpoint TEXT  | The URL towards the BrAPI endpint, not ending with /                                                   | yes      |
-| -d, --date TEXT      | The date of sample publication (example:2021-01-20T17:05:13Z)                                          | yes      |
-| -D, --domain TEXT    | The domain of your ENA account                                                                         | yes      |
+| -t, --trialDbId      | The identifier of a trial                                                                              | yes      |
+| -e, --endpoint       | The URL towards the BrAPI endpint, not ending with /                                                   | yes      |
+| -d, --date           | The date of sample publication (example:2021-01-20T17:05:13Z)                                          | yes      |
+| -D, --domain         | The domain of your ENA account                                                                         | yes      |
 | -s, --submit         | When this flag is given, the samples will be submitted to BioSamples instead of being exported as JSON |          |
 | --dev                | When this flag is given, the samples will be submitted to the dev instance of BioSamples               |          |
-| --secret FILENAME    | Path to a secret.yml file to deliver the BioSample credentials                                         |          |
-| --output PATH        | Path to a directory where the JSON files are written to.                                               |          |
+| --secret             | Path to a secret.yml file to deliver the BioSample credentials                                         |          |
+| --output             | Path to a directory where the JSON files are written to.                                               |          |
 | -h, --help           | Show this message and exit.                                                                            |          |
 
 
