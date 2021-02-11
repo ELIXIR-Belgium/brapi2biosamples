@@ -87,7 +87,7 @@ def fetch_objects(endpoint, path, params: dict = None):
 
         return output
 
-@click.command(context_settings={'help_option_names': ['-h', '--help']}, short_help="Submits samples to BioSamples using the Breeding API")
+@click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.version_option("0.1.0", "-v", "--version", prog_name="brapi2biosamples", help="Print version number")
 @click.option("--trialDbId", "-t", help="The identifier of a trial", required=True)
 @click.option("--endpoint", "-e", help="The URL towards the BrAPI endpint, not ending with /", required=True)
@@ -99,7 +99,7 @@ def fetch_objects(endpoint, path, params: dict = None):
 @click.option("--output", help="Path to a directory where the JSON files are written to.", type=click.Path(exists=True))
 
 def main(trialDbId, endpoint, date, domain, submit, dev, secret, output):
-    """ Main function """
+    """ Submits samples to BioSamples using the Breeding API """
     # Fetch studies from trial
     trial = fetch_object(endpoint, f'/trials/{trialDbId}')
     added_germplasm = []
