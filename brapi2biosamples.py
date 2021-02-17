@@ -90,7 +90,7 @@ def fetch_objects(endpoint, path, params: dict = None):
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.version_option("0.1.0", "-v", "--version", prog_name="brapi2biosamples", help="Print version number")
 @click.option("--trialdbid", "-t", help="The identifier of a trial", required=True)
-@click.option("--endpoint", "-e", help="The URL towards the BrAPI endpint, not ending with /", required=True)
+@click.option("--endpoint", "-e", help="The URL towards the BrAPI endpoint, not ending with /", required=True)
 @click.option("--date", "-d", help="The date of sample publication (example: 2021-01-20T17:05:13Z)", default=datetime.now().isoformat())
 @click.option("--domain", "-D", help="The domain of your ENA account", required=True)
 @click.option("--submit", "-s", help="When this flag is given, the samples will be submitted to BioSamples instead of being exported as JSON", is_flag=True)
