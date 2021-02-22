@@ -4,6 +4,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import time
 import click
+import yaml
 from datetime import datetime
 
 
@@ -19,12 +20,21 @@ def characteristic(text, ontology=None):
     else:
         return [{"text": text}]
 
+def fetch_token(username, password, dev):
+    if dev:
+        endpoint = 'https://explore.api.aai.ebi.ac.uk/auth'
+    else:
+        endpoint = 'https://api.aai.ebi.ac.uk/auth'
+    
+    token = requests.get(endpoint, auth=(username, password))
+    if token.status_code != 200:
+        print("problem with request: " + str(token))
+        raise RuntimeError("Non-200 status code")
+    return(token.text)
 
 def fetch_object(endpoint, path):
     """
     Fetch single BrAPI object by path
-    :param path URL path of the BrAPI call (ex '/studies/1', '/germplasm/2', ...)
-    :return a BrAPI object parsed from JSON to python dict
     """
     url = url_path_join(endpoint, path)
     print('GET ' + url)
@@ -47,9 +57,6 @@ def fetch_object(endpoint, path):
 def fetch_objects(endpoint, path, params: dict = None):
     """
     Fetch BrAPI objects with pagination
-    :param path URL path of the BrAPI call (ex '/studies', '/germplasm-search', ...)
-    :param params dict containing the query params for the BrAPI call
-    :return iterable of BrAPI objects parsed from JSON to python dict
     """
     page = 0
     pagesize = 1000
@@ -95,11 +102,22 @@ def fetch_objects(endpoint, path, params: dict = None):
 @click.option("--domain", "-D", help="The domain of your ENA account", required=True)
 @click.option("--submit", "-s", help="When this flag is given, the samples will be submitted to BioSamples instead of being exported as JSON", is_flag=True)
 @click.option("--dev", help="When this flag is given, the samples will be submitted to the dev instance of BioSamples", is_flag=True)
-@click.option("--secret", help="Path to a secret.yml file to deliver the BioSample credentials", type=click.File())
+@click.option("--secret", help="Path to a secret.yml file to deliver the BioSample credentials", type=click.Path(exists=True))
 @click.option("--output", help="Path to a directory where the JSON files are written to.", type=click.Path(exists=True))
 
 def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
     """ Submits samples to BioSamples using the Breeding API """
+
+    if submit:
+        click.format_filename(secret)
+        secret_file = open(secret, "r")
+        credentials = yaml.load(secret_file, Loader=yaml.FullLoader)
+
+        password = credentials['password'].strip()
+        username = credentials['username'].strip()
+        token = fetch_token(username, password, dev)
+
+
     # Fetch studies from trial
     trial = fetch_object(endpoint, f'/trials/{trialdbid}')
     added_germplasm = []
@@ -130,9 +148,9 @@ def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
                     germplasminfo['accessionNumber'])
                 germjson['characteristics']['material source ID'] = characteristic(
                     germplasminfo['germplasmName'])
-
-                with open('o_' + germplasm['germplasmDbId'] + '.json', 'w') as outfile:
-                    outfile.write(json.dumps(germjson, indent=4))
+                if not submit:
+                    with open('o_' + germplasm['germplasmDbId'] + '.json', 'w') as outfile:
+                        outfile.write(json.dumps(germjson, indent=4))
 
 
 if __name__ == "__main__":
