@@ -147,6 +147,7 @@ def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
         if not secret:
             print("A secret file with the credentials is mandatory when you want to do a submission.")
             exit()
+        submissions = []
         if dev:
             print("--- This is a test submission ---")
             ENDPOINTS = ALL_ENDPOINTS['dev']
@@ -200,17 +201,18 @@ def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
 
                 if submit:
                     print(
-                        f"  - Validating the JSON-LD schema of f{germplasm['germplasmDbId']}")
+                        f"  - Validating the JSON-LD schema of {germplasm['germplasmDbId']}")
                     validate = fetch_POST(
                         ENDPOINTS['validate'], token, json.dumps(germjson))
                     if validate:
                         print("  Validation was successful")
                     print(
-                        f"  - Submitting the JSON-LD schema of f{germplasm['germplasmDbId']}")
+                        f"  - Submitting the JSON-LD schema of {germplasm['germplasmDbId']}")
                     submit = fetch_POST(
                         ENDPOINTS['submit'], token, json.dumps(germjson))
                     print(
                         f"  Sample was successfully submitted as:\n    Name: {submit['name']}\n    Accession: {submit['accession']}\n    URL: {ENDPOINTS['sample'] + submit['accession']}")
+                    submissions.append(submit['accession'])
                 else:
                     filepath = os.path.join(
                         output, f"o_{germplasm['germplasmDbId']}.json")
@@ -218,7 +220,13 @@ def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
                         outfile.write(json.dumps(germjson, indent=4))
                     print(
                         f"  BioSample JSON-LD from {study} dumped as {filepath}")
-
+    if submit:
+        with open('submission_details.text', 'w') as submitfile:
+            submitfile.write('\n'.join(submissions))
+        print("All accession numbers of the submissions or written to submission_details.text")
+        print(f"Submission of {len(added_germplasm)} samples to BioSamples has successfully ended")
+    else:
+        print("Dumping successful")
 
 if __name__ == "__main__":
     main()

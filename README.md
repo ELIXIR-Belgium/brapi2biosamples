@@ -63,6 +63,7 @@ brapi2biosamples [OPTIONS]
 - When the JSON look fine, add the `--submit` flag to your command + the `--secret` option (mandatory on submission) and samples will be submitted to BioSamples. The `--secret` option points towards a .secret.yml file with. Please follow the syntax of the example secret.yml in this repository. 
 - It is possible to submit to the BioSamples dev instance for testing purposes by adding the `--dev` flag to your command.
 - If you do not specify the sample publication date with the `--date` option, the current time will be used.
+- After submission a file will be created with all the BioSample accession numbers of the corresponding samples.
 
 
 ## Examples
