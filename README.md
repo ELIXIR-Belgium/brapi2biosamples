@@ -1,3 +1,5 @@
+[![Python package](https://github.com/ELIXIR-Belgium/brapi2biosamples/actions/workflows/python-package.yml/badge.svg)](https://github.com/ELIXIR-Belgium/brapi2biosamples/actions/workflows/python-package.yml)
+
 # BrAPI 2 BioSamples
 
 Command Line Interface (CLI) to generate BioSamples ready JSON and to submit samples to [BioSamples](https://wwwdev.ebi.ac.uk/biosamples) using the [Breeding API](https://brapi.org/). 
