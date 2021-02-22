@@ -144,6 +144,9 @@ def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
     """ Submits samples to BioSamples using the Breeding API """
 
     if submit:
+        if not secret:
+            print("A secret file with the credentials is mandatory when you want to do a submission.")
+            exit()
         if dev:
             print("--- This is a test submission ---")
             ENDPOINTS = ALL_ENDPOINTS['dev']
