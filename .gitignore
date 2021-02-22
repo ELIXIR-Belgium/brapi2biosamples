@@ -1,3 +1,4 @@
 o_*
 .vscode
 aap.jwt
+.secret.yml
