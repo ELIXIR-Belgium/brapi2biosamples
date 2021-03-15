@@ -198,7 +198,7 @@ def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
                     germplasminfo['accessionNumber'])
                 germjson['characteristics']['material source ID'] = characteristic(
                     germplasminfo['germplasmName'])
-
+                    
                 if submit:
                     print(
                         f"  - Validating the JSON-LD schema of {germplasm['germplasmDbId']}")
@@ -212,7 +212,7 @@ def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
                         ENDPOINTS['submit'], token, json.dumps(germjson))
                     print(
                         f"  Sample was successfully submitted as:\n    Name: {submit['name']}\n    Accession: {submit['accession']}\n    URL: {ENDPOINTS['sample'] + submit['accession']}")
-                    submissions.append(submit['accession'])
+                    submissions.append(f"{submit['name']}\t{submit['accession']}")
                 else:
                     filepath = os.path.join(
                         output, f"o_{germplasm['germplasmDbId']}.json")
