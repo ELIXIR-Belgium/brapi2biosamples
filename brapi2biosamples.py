@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding: utf8
+
 import json
 import os
 import requests
@@ -11,13 +14,13 @@ from datetime import datetime
 ALL_ENDPOINTS = {
     "dev": {
         "token": "https://explore.api.aai.ebi.ac.uk/auth",
-        "validate": "https://wwwdev.ebi.ac.uk/biosamples/samples/validate",
-        "submit": "https://wwwdev.ebi.ac.uk/biosamples/samples",
+        "validate": "https://wwwdev.ebi.ac.uk/biosamples/validate",
+        "submit": "https://wwwdev.ebi.ac.uk/biosamples/samples/",
         "sample": "https://wwwdev.ebi.ac.uk/biosamples/samples/"
     },
     "stable": {
         "token": "https://api.aai.ebi.ac.uk/auth",
-        "validate": "https://www.ebi.ac.uk/biosamples/samples/validate",
+        "validate": "https://www.ebi.ac.uk/biosamples/validate",
         "submit": "https://www.ebi.ac.uk/biosamples/samples",
         "sample": "https://www.ebi.ac.uk/biosamples/samples/"
     }
@@ -130,6 +133,51 @@ def fetch_objects(endpoint, path):
         return output
 
 
+def reconstruct_accession_name(germplasminfo):
+    genus = germplasminfo['genus']+":"
+    if 'holdingInstitute' in germplasminfo:
+        institute = (germplasminfo['holdingInstitute']['acronym'] + ":")
+    else:
+        institute = (germplasminfo['instituteName']+":")
+    accessionNumber = germplasminfo['accessionNumber']
+
+    return genus+institute+accessionNumber
+
+
+def generate_taxon_link(germplasminfo):
+    ncbi_url = "http://purl.obolibrary.org / obo / NCBITaxon_"
+    taxonIds = germplasminfo['taxonIds']
+    for taxonId in taxonIds:
+        if taxonId['sourceName'].upper() == "NCBI":
+            ncbi_id = taxonId['taxonId']
+            return ncbi_url + ncbi_id
+        else:
+            return germplasminfo['commonCropName']
+
+
+def generate_synonyms(germplasminfo):
+
+    def characterize(old_list):
+        new_list = []
+        for item in old_list:
+            new_list.append({"text": item})
+        return new_list
+    synonyms = set()
+
+    synonyms.add((germplasminfo['germplasmName']))
+    if 'synonyms' in germplasminfo:
+        if germplasminfo['synonyms']:
+            for synonym in germplasminfo['synonyms']:
+                synonyms.add(synonym)
+    if 'defaultDisplayName' in germplasminfo:
+        if germplasminfo['defaultDisplayName']:
+            synonyms.add(germplasminfo['defaultDisplayName'])
+    if 'externalReferences' in germplasminfo:
+        if germplasminfo['externalReferences']:
+            synonyms.add(germplasminfo['externalReferences'])
+    return characterize(list(synonyms))
+
+
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.version_option("0.1.0", "-v", "--version", prog_name="brapi2biosamples", help="Print version number")
 @click.option("--trialdbid", "-t", help="The identifier of a trial", required=True)
@@ -140,7 +188,9 @@ def fetch_objects(endpoint, path):
 @click.option("--dev", help="When this flag is given, the samples will be submitted to the dev instance of BioSamples", is_flag=True)
 @click.option("--secret", help="Path to a secret.yml file to deliver the BioSample credentials", type=click.Path(exists=True))
 @click.option("--output", help="Path to a directory where the JSON files are written to.", type=click.Path(exists=True), default=".")
-def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
+@click.option("--rename", "-N", help="If the \"germplasmDbId\" is source specific reconstruct the name with "
+                                           "genus, instituteName and accessionNumber.", is_flag=True)
+def main(trialdbid, endpoint, date, domain, submit, dev, secret, output, rename):
     """ Submits samples to BioSamples using the Breeding API """
 
     if submit:
@@ -182,23 +232,32 @@ def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
                 # Get extra Germplasm information (Needed for PIPPA)
                 germplasminfo = fetch_object(endpoint,
                                              f"/germplasm/{germplasm['germplasmDbId']}")
-                germjson = {"name": germplasminfo['germplasmDbId'],
-                            "domain": domain, "release": date, "characteristics": {}}
+
+                if rename:
+                    germjson = {"name": reconstruct_accession_name(germplasminfo),
+                                "domain": domain,
+                                "release": date,
+                                "characteristics": {}}
+                else:
+                    germjson = {"name": germplasminfo['germplasmDbId'],
+                                "domain": domain, "release": date, "characteristics": {}}
                 germjson['characteristics']['project name'] = characteristic(
                     study['studyDbId'])
                 germjson['characteristics']['biological material ID'] = characteristic(
-                    germplasminfo['germplasmDbId'])
+                    germplasminfo['germplasmPUI'] if germplasminfo['germplasmPUI'] else germplasminfo['germplasmDbId'])
+                germjson['characteristics']['synonyms'] = generate_synonyms(germplasminfo)
                 germjson['characteristics']['organism'] = characteristic(
-                    germplasminfo['commonCropName'])
+                    generate_taxon_link(germplasminfo) if germplasminfo['taxonIds']
+                    else germplasminfo['commonCropName'])
                 germjson['characteristics']['genus'] = characteristic(
                     germplasminfo['genus'])
                 germjson['characteristics']['species'] = characteristic(
                     germplasminfo['species'])
                 germjson['characteristics']['infraspecific name'] = characteristic(
-                    germplasminfo['accessionNumber'])
+                    germplasminfo['subtaxa'])
                 germjson['characteristics']['material source ID'] = characteristic(
-                    germplasminfo['germplasmName'])
-                    
+                    germplasminfo['germplasmPUI'] if germplasminfo['germplasmPUI'] else germplasminfo['germplasmDbId'])
+
                 if submit:
                     print(
                         f"  - Validating the JSON-LD schema of {germplasm['germplasmDbId']}")
