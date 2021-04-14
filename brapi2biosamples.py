@@ -9,6 +9,7 @@ from urllib3.util.retry import Retry
 import time
 import click
 import yaml
+import base64
 from datetime import datetime
 
 ALL_ENDPOINTS = {
@@ -51,7 +52,7 @@ def fetch_token(endpoint, username, password):
     if token.status_code != 200:
         print(f"Problem with request: {str(token)}")
         raise RuntimeError("Non-200 status code")
-    return(token.text)
+    return (token.text)
 
 
 def fetch_POST(endpoint, token, data):
@@ -134,14 +135,14 @@ def fetch_objects(endpoint, path):
 
 
 def reconstruct_accession_name(germplasminfo):
-    genus = germplasminfo['genus']+":"
+    genus = germplasminfo['genus'] + ":"
     if 'holdingInstitute' in germplasminfo:
         institute = (germplasminfo['holdingInstitute']['acronym'] + ":")
     else:
-        institute = (germplasminfo['instituteName']+":")
+        institute = (germplasminfo['instituteName'] + ":")
     accessionNumber = germplasminfo['accessionNumber']
 
-    return genus+institute+accessionNumber
+    return genus + institute + accessionNumber
 
 
 def generate_taxon_link(germplasminfo):
@@ -156,7 +157,6 @@ def generate_taxon_link(germplasminfo):
 
 
 def generate_synonyms(germplasminfo):
-
     def characterize(old_list):
         new_list = []
         for item in old_list:
@@ -178,19 +178,69 @@ def generate_synonyms(germplasminfo):
     return characterize(list(synonyms))
 
 
+def decode_base64(json_data: dict, encode_fields: str):
+    encode_fields = encode_fields.replace(", ", ",").split(",")
+
+    i = 0
+    keys = list(json_data.keys())
+    while i < len(json_data) and len(encode_fields) > 0:
+        entry = keys[i]
+        i += 1
+        if entry in encode_fields:
+            if isinstance(json_data[entry], str):
+                value = json_data[entry]
+                decoded_value = {"text": base64.b64decode(value).decode('utf-8')}
+                json_data[entry] = decoded_value
+                encode_fields.remove(entry)
+            if isinstance(json_data[entry], list):
+                for e in range(len(json_data[entry])):
+                    value = json_data[entry][e]['text']
+                    decoded_value = {"text": base64.b64decode(value).decode('utf-8')}
+                    json_data[entry][e] = decoded_value
+                    encode_fields.remove(entry)
+        if isinstance(json_data[entry], dict):
+            j = 0
+            nested_keys = list(json_data[entry].keys())
+            while j < len(json_data[entry]):
+                nested_entry = nested_keys[j]
+                j += 1
+                if nested_entry in encode_fields :
+                    if isinstance(json_data[entry][nested_entry], str):
+                        value = json_data[entry][nested_entry]
+                        decoded_value = {"text": base64.b64decode(value).decode('utf-8')}
+                        json_data[entry][nested_entry] = decoded_value
+                        encode_fields.remove(nested_entry)
+                    if isinstance(json_data[entry][nested_entry], list):
+                        for e in range(len(json_data[entry][nested_entry])):
+                            value = json_data[entry][nested_entry][e]['text']
+                            decoded_value = {"text": base64.b64decode(value).decode('utf-8')}
+                            json_data[entry][nested_entry][e] = decoded_value
+                            encode_fields.remove(nested_entry)
+
+    return json_data
+
+
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.version_option("0.1.0", "-v", "--version", prog_name="brapi2biosamples", help="Print version number")
 @click.option("--trialdbid", "-t", help="The identifier of a trial", required=True)
 @click.option("--endpoint", "-e", help="The URL towards the BrAPI endpoint, not ending with /", required=True)
-@click.option("--date", "-d", help="The date of sample publication (example: 2021-01-20T17:05:13Z)", default=datetime.now().isoformat())
+@click.option("--date", "-d", help="The date of sample publication (example: 2021-01-20T17:05:13Z)",
+              default=datetime.now().isoformat())
 @click.option("--domain", "-D", help="The domain of your ENA account", required=True)
-@click.option("--submit", "-s", help="When this flag is given, the samples will be submitted to BioSamples instead of being exported as JSON", is_flag=True)
-@click.option("--dev", help="When this flag is given, the samples will be submitted to the dev instance of BioSamples", is_flag=True)
-@click.option("--secret", help="Path to a secret.yml file to deliver the BioSample credentials", type=click.Path(exists=True))
-@click.option("--output", help="Path to a directory where the JSON files are written to.", type=click.Path(exists=True), default=".")
+@click.option("--submit", "-s",
+              help="When this flag is given, the samples will be submitted to BioSamples instead of being exported as JSON",
+              is_flag=True)
+@click.option("--dev", help="When this flag is given, the samples will be submitted to the dev instance of BioSamples",
+              is_flag=True)
+@click.option("--secret", help="Path to a secret.yml file to deliver the BioSample credentials",
+              type=click.Path(exists=True))
+@click.option("--output", help="Path to a directory where the JSON files are written to.", type=click.Path(exists=True),
+              default=".")
 @click.option("--rename", "-N", help="If the \"germplasmDbId\" is source specific reconstruct the name with "
-                                           "genus, instituteName and accessionNumber.", is_flag=True)
-def main(trialdbid, endpoint, date, domain, submit, dev, secret, output, rename):
+                                     "genus, instituteName and accessionNumber.", is_flag=True)
+@click.option("--decode", "-c",
+              help="Specify the fields that need to be decode by base64, split by coma. ex -c \"field 1, field 2\"")
+def main(trialdbid, endpoint, date, domain, submit, dev, secret, output, rename, decode):
     """ Submits samples to BioSamples using the Breeding API """
 
     if submit:
@@ -258,6 +308,9 @@ def main(trialdbid, endpoint, date, domain, submit, dev, secret, output, rename)
                 germjson['characteristics']['material source ID'] = characteristic(
                     germplasminfo['germplasmPUI'] if germplasminfo['germplasmPUI'] else germplasminfo['germplasmDbId'])
 
+                if decode:
+                    germjson = decode_base64(germjson, decode)
+
                 if submit:
                     print(
                         f"  - Validating the JSON-LD schema of {germplasm['germplasmDbId']}")
@@ -276,7 +329,7 @@ def main(trialdbid, endpoint, date, domain, submit, dev, secret, output, rename)
                     filepath = os.path.join(
                         output, f"o_{germplasm['germplasmDbId']}.json")
                     with open(filepath, 'w') as outfile:
-                        outfile.write(json.dumps(germjson, indent=4))
+                        outfile.write(json.dumps(germjson, indent=4, ensure_ascii=False))
                     print(
                         f"  BioSample JSON-LD from {study} dumped as {filepath}")
     if submit:
