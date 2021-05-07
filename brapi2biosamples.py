@@ -198,7 +198,9 @@ def main(trialdbid, endpoint, date, domain, submit, dev, secret, output):
                     germplasminfo['accessionNumber'])
                 germjson['characteristics']['material source ID'] = characteristic(
                     germplasminfo['germplasmName'])
-                    
+                germjson['characteristics']['biological material geographic location'] = characteristic("Italy")
+                germjson['characteristics']['sample description'] = characteristic("Entries were field laid out as a 25 x 25 squared lattice design, in singlerow plots 4.40 m long and 0.80 m wide with a plant density of 6.25 plants m2. Plant density was kept low given the expected wide range of plant sizes so to minimize the biases due to uneven competition among plants of different size.")
+
                 if submit:
                     print(
                         f"  - Validating the JSON-LD schema of {germplasm['germplasmDbId']}")
