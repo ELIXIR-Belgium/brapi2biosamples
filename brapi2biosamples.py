@@ -236,8 +236,7 @@ def decode_base64(json_data: dict, encode_fields: str):
               type=click.Path(exists=True))
 @click.option("--output", help="Path to a directory where the JSON files are written to.", type=click.Path(exists=True),
               default=".")
-@click.option("--rename", "-N", help="If the \"germplasmDbId\" is source specific reconstruct the name with "
-                                     "genus, instituteName and accessionNumber.", is_flag=True)
+@click.option("--rename", "-N", help="If the \"germplasmDbId\" is source specific reconstruct the name with \"genus, instituteName and accessionNumber.\"", is_flag=True)
 @click.option("--decode", "-c",
               help="Specify the fields that need to be decode by base64, split by coma. ex -c \"field 1, field 2\"")
 def main(trialdbid, endpoint, date, domain, submit, dev, secret, output, rename, decode):

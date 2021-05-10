@@ -45,19 +45,20 @@ When brapi2biosamples is installed correctly it should be available through the 
 brapi2biosamples [OPTIONS] 
 ```
 
-| Option               | Description                                                                                            | Required |
-|----------------------|--------------------------------------------------------------------------------------------------------|----------|
-| -v, --version        | Print version number                                                                                   |          |
-| -t, --trialDbId      | The identifier of a trial                                                                              | yes      |
-| -e, --endpoint       | The URL towards the BrAPI endpoint, not ending with /                                                  | yes      |
-| -d, --date           | The date of sample publication (example:2021-01-20T17:05:13Z)                                          |          |
-| -D, --domain         | The domain of your ENA account                                                                         | yes      |
-| -s, --submit         | When this flag is given, the samples will be submitted to BioSamples instead of being exported as JSON |          |
-| --dev                | When this flag is given, the samples will be submitted to the dev instance of BioSamples               |          |
-| --secret             | Path to a secret.yml file to deliver the BioSample credentials                                         |          |
-| --output             | Path to a directory where the JSON files are written to.                                               |          |
-| -h, --help           | Show this message and exit.                                                                            |          |
-
+| Option               | Description                                                                                                     | Required |
+|----------------------|-----------------------------------------------------------------------------------------------------------------|----------|
+| -v, --version        | Print version number                                                                                            |          |
+| -t, --trialDbId      | The identifier of a trial                                                                                       | yes      |
+| -e, --endpoint       | The URL towards the BrAPI endpoint, not ending with /                                                           | yes      |
+| -d, --date           | The date of sample publication (example:2021-01-20T17:05:13Z)                                                   |          |
+| -D, --domain         | The domain of your ENA account                                                                                  | yes      |
+| -s, --submit         | When this flag is given, the samples will be submitted to BioSamples instead of being exported as JSON          |          |
+| --dev                | When this flag is given, the samples will be submitted to the dev instance of BioSamples                        |          |
+| --secret             | Path to a secret.yml file to deliver the BioSample credentials                                                  |          |
+| --output             | Path to a directory where the JSON files are written to.                                                        |          |
+| -h, --help           | Show this message and exit.                                                                                     |          |
+| --rename             | If the "germplasmDbId" is source specific reconstruct the name with "genus, instituteName and accessionNumber". |          |
+| --decode             | Specify the fields that need to be decode by base64, split by coma. ex -c "field 1, field 2"                    |          |
 
 - If the brapi2biosamples CLI is used without the `--submit` flag, it will dump the JSON files for submission in the working directory or in an output directory specified by the `--output` option. It is recommended to try out your endpoints this way before actual submission.
 - When the JSON look fine, add the `--submit` flag to your command + the `--secret` option (mandatory on submission) and samples will be submitted to BioSamples. The `--secret` option points towards a .secret.yml file with. Please follow the syntax of the example secret.yml in this repository. 
