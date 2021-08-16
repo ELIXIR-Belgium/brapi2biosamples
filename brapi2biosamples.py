@@ -17,13 +17,15 @@ ALL_ENDPOINTS = {
         "token": "https://explore.api.aai.ebi.ac.uk/auth",
         "validate": "https://wwwdev.ebi.ac.uk/biosamples/validate",
         "submit": "https://wwwdev.ebi.ac.uk/biosamples/samples/",
-        "sample": "https://wwwdev.ebi.ac.uk/biosamples/samples/"
+        "sample": "https://wwwdev.ebi.ac.uk/biosamples/samples/",
+        "update": "https://www.ebi.ac.uk/biosamples/samples/"
     },
     "stable": {
         "token": "https://api.aai.ebi.ac.uk/auth",
         "validate": "https://www.ebi.ac.uk/biosamples/validate",
         "submit": "https://www.ebi.ac.uk/biosamples/samples",
-        "sample": "https://www.ebi.ac.uk/biosamples/samples/"
+        "sample": "https://www.ebi.ac.uk/biosamples/samples/",
+        "update": "https://www.ebi.ac.uk/biosamples/samples/"
     }
 }
 
@@ -233,6 +235,8 @@ def decode_base64(json_data: dict, encode_fields: str):
 @click.option("--dev", help="When this flag is given, the samples will be submitted to the dev instance of BioSamples",
               is_flag=True)
 @click.option("--secret", help="Path to a secret.yml file to deliver the BioSample credentials",
+              type=click.Path(exists=True))
+@click.option("--update", help="Path to a tsv file to update submissions",
               type=click.Path(exists=True))
 @click.option("--output", help="Path to a directory where the JSON files are written to.", type=click.Path(exists=True),
               default=".")
