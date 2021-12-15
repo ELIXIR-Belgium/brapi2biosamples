@@ -250,8 +250,8 @@ def decode_base64(json_data: dict, encode_fields: str):
 @click.option("--date", "-d", help="The date of sample publication (example: 2021-01-20T17:05:13Z)",
               default=datetime.now().isoformat())
 @click.option("--domain", "-D", help="The domain of your ENA account", required=True)
-@click.option("--submit", "-s",
-              help="When this flag is given, the samples will be submitted to BioSamples instead of being exported as JSON",
+@click.option("--draft",
+              help="When this flag is given, the samples will not be submitted to BioSamples but exported as JSON",
               is_flag=True)
 @click.option("--dev", help="When this flag is given, the samples will be submitted to the dev instance of BioSamples",
               is_flag=True)
