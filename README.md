@@ -1,4 +1,5 @@
 [![Python package](https://github.com/ELIXIR-Belgium/brapi2biosamples/actions/workflows/python-package.yml/badge.svg)](https://github.com/ELIXIR-Belgium/brapi2biosamples/actions/workflows/python-package.yml)
+[![Pipy version](https://badge.fury.io/py/brapi2biosamples.svg)](https://pypi.org/project/brapi2biosamples/)
 
 # BrAPI 2 BioSamples
 
@@ -25,16 +26,10 @@ The submission is compliant with the [MIAPPE BioSamples validation scheme](https
 
 ## Installation
 
-Simply use following command line to install brapi2biosamples fetcher on linux/macOS:
+Simply use following command line to install brapi2biosamples:
 
 ```
-sudo python3 -m pip install git+git://github.com/bedroesb/brapi2biosamples.git
-```
-
-or this command for Windows (be sure that Python is installed):
-
-```
-pip install git+git://github.com/bedroesb/brapi2biosamples.git
+pip install brapi2biosamples
 ```
 
 ## Usage
